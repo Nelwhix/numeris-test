@@ -67,3 +67,24 @@ func (m *Model) GetUserById(ctx context.Context, userID string) (User, error) {
 
 	return user, nil
 }
+
+func (m *Model) GetUserByToken(ctx context.Context, token string) (User, error) {
+	cToken, err := m.FindToken(ctx, token)
+	if err != nil {
+		return User{}, err
+	}
+
+	lastUsedAt := time.Now()
+	cToken.LastUsedAt = &lastUsedAt
+	err = m.UpdateToken(ctx, cToken)
+	if err != nil {
+		return User{}, err
+	}
+
+	user, err := m.GetUserById(ctx, cToken.UserID)
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}

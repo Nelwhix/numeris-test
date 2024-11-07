@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Nelwhix/numeris/handlers"
 	"github.com/Nelwhix/numeris/pkg"
+	"github.com/Nelwhix/numeris/pkg/middlewares"
 	"github.com/Nelwhix/numeris/pkg/models"
 	"github.com/go-playground/validator/v10"
 	gHandlers "github.com/gorilla/handlers"
@@ -53,21 +54,21 @@ func main() {
 		Validator: validate,
 	}
 
-	//m := middlewares.AuthMiddleware{
-	//	Model: model,
-	//}
+	m := middlewares.AuthMiddleware{
+		Model: model,
+	}
 
 	r := http.NewServeMux()
 
 	// Guest Routes
-	r.HandleFunc("POST /api/auth/signup", handler.SignUp)
-	r.HandleFunc("POST /api/auth/login", handler.Login)
+	r.HandleFunc("POST /api/v1/auth/signup", handler.SignUp)
+	r.HandleFunc("POST /api/v1/auth/login", handler.Login)
 
-	//// Auth routes
-	//r.Handle("GET /api/me", m.Register(handler.Me))
+	// Auth routes
+	r.Handle("GET /api/v1/invoices/widgets", m.Register(handler.GetInvoiceWidgetsData))
 	//r.Handle("POST /api/games", m.Register(handler.CreateNewGame))
 
-	fmt.Printf("iCallOn started at http://localhost:%s\n", ServerPort)
+	fmt.Printf("Numeris started at http://localhost:%s\n", ServerPort)
 
 	err = http.ListenAndServe(ServerPort, gHandlers.CombinedLoggingHandler(os.Stdout, r))
 	if err != nil {
