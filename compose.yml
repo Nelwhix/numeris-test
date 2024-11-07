@@ -1,0 +1,18 @@
+networks:
+  numeris-test:
+
+services:
+  postgres:
+    image: postgres:12.20-alpine
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=nelwhix
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=numeris_test
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+    driver: local
