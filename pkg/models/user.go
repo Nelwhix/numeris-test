@@ -9,10 +9,10 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	ID       string
+	Username string
+	Email    string
+	Password string
 }
 
 func (m *Model) GetUserByEmail(ctx context.Context, email string) (User, error) {

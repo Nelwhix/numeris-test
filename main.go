@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	gHandlers "github.com/gorilla/handlers"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -44,6 +45,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to db: %v", err)
 	}
+
+	cache := pkg.CreateCacheStore()
 	model := models.Model{
 		Conn: conn,
 	}
@@ -52,10 +55,12 @@ func main() {
 		Model:     model,
 		Logger:    logger,
 		Validator: validate,
+		Cache:     cache,
 	}
 
 	m := middlewares.AuthMiddleware{
-		Model: model,
+		Model:  model,
+		Logger: logger,
 	}
 
 	r := http.NewServeMux()
@@ -66,11 +71,17 @@ func main() {
 
 	// Auth routes
 	r.Handle("GET /api/v1/invoices/widgets", m.Register(handler.GetInvoiceWidgetsData))
-	//r.Handle("POST /api/games", m.Register(handler.CreateNewGame))
+	r.Handle("POST /api/v1/invoices", m.Register(handler.CreateInvoice))
 
 	fmt.Printf("Numeris started at http://localhost:%s\n", ServerPort)
 
-	err = http.ListenAndServe(ServerPort, gHandlers.CombinedLoggingHandler(os.Stdout, r))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            false,
+	})
+	err = http.ListenAndServe(ServerPort, gHandlers.CombinedLoggingHandler(os.Stdout, c.Handler(middlewares.ContentTypeMiddleware(r))))
 	if err != nil {
 		log.Printf("failed to run the server: %v", err)
 	}

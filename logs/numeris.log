@@ -1,0 +1,9 @@
+{"time":"2024-11-08T13:42:49.24178+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T13:43:29.453181+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T13:51:40.659658+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T13:53:37.102107+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T13:53:57.712817+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T14:11:50.120679+01:00","level":"ERROR","msg":"Error creating invoice: ERROR: null value in column \"user_id\" violates not-null constraint (SQLSTATE 23502)"}
+{"time":"2024-11-08T18:08:19.600146+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T18:08:37.672556+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
+{"time":"2024-11-08T18:09:32.169512+01:00","level":"ERROR","msg":"Failed to get invoice widgets data: can't scan into dest[5]: cannot scan NULL into *int64"}

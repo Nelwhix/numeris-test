@@ -7,12 +7,17 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
+      "url": "http://localhost:8080/api/v1",
       "description": "local server"
     }
   ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
   "paths": {
-    "/api/v1/auth/signup": {
+    "/auth/signup": {
       "post": {
         "tags": [
           "Auth"
@@ -35,7 +40,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResource"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserResource"
+                    }
+                  }
                 }
               }
             }
@@ -46,7 +59,7 @@
         }
       }
     },
-    "/api/v1/auth/login": {
+    "/auth/login": {
       "post": {
         "tags": [
           "Auth"
@@ -69,13 +82,128 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResource"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserResource"
+                    }
+                  }
                 }
               }
             }
           },
           "422": {
             "description": "Unprocessable entity"
+          }
+        }
+      }
+    },
+    "/invoices": {
+      "post": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Create an invoice",
+        "operationId": "e6b7782f-7d43-438d-a63c-f8610ab0f10a",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invoice created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/InvoiceResource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity"
+          }
+        }
+      }
+    },
+    "/invoices/widgets": {
+      "get": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Get invoice metrics",
+        "operationId": "0903cddf-a979-497d-adff-6ee359ba291a",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice data retrieved successfully!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalDraft": {
+                          "type": "integer"
+                        },
+                        "totalOverdue": {
+                          "type": "integer"
+                        },
+                        "totalUnpaid": {
+                          "type": "integer"
+                        },
+                        "totalPaid": {
+                          "type": "integer"
+                        },
+                        "totalDraftAmount": {
+                          "type": "string"
+                        },
+                        "totalOverdueAmount": {
+                          "type": "string"
+                        },
+                        "totalUnpaidAmount": {
+                          "type": "string"
+                        },
+                        "totalPaidAmount": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -159,6 +287,67 @@
           }
         },
         "type": "object"
+      },
+      "CreateInvoiceRequest": {
+        "title": "CreateInvoiceRequest",
+        "required": [
+          "title",
+          "amount",
+          "dueDate"
+        ],
+        "properties": {
+          "title": {
+            "description": "Invoice title",
+            "type": "string"
+          },
+          "amount": {
+            "description": "Invoice amount in cents",
+            "type": "string"
+          },
+          "dueDate": {
+            "description": "Invoice due date in RFC3339 format: 2024-11-08T14:25:00Z",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvoiceResource": {
+        "title": "InvoiceResource",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "integer"
+              },
+              "state": {
+                "type": "string"
+              },
+              "dueAt": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

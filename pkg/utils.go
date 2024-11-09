@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -21,4 +22,14 @@ func ParseRequestBody[T any](r *http.Request) (T, error) {
 	}
 
 	return requestData, nil
+}
+
+func FormatMoneyToUsd(amount *int64) string {
+	if amount == nil {
+		return "$0.00"
+	}
+
+	amountInUsd := float64(*amount) / 100.0
+
+	return fmt.Sprintf("$%.2f", amountInUsd)
 }

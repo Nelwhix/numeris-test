@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/Nelwhix/numeris/pkg"
 	"github.com/Nelwhix/numeris/pkg/requests"
 	"github.com/Nelwhix/numeris/pkg/responses"
@@ -26,7 +27,6 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	request, err := pkg.ParseRequestBody[requests.SignUp](r)
 	if err != nil {
 		responses.NewUnprocessableEntity(w, err.Error())
-
 		return
 	}
 
@@ -44,6 +44,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.Model.InsertIntoUsers(r.Context(), request)
 	if err != nil {
+		h.Logger.Error(fmt.Sprintf("Error creating user: %v", err.Error()))
 		responses.NewInternalServerError(w, err.Error())
 		return
 	}
@@ -92,6 +93,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := pkg.GetOrCreateToken(h.Model, user.ID)
 	if err != nil {
+		h.Logger.Error(fmt.Sprintf("Error creating token: %v", err.Error()))
 		responses.NewInternalServerError(w, err.Error())
 		return
 	}
