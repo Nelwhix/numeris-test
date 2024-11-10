@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/Nelwhix/numeris/pkg"
@@ -46,11 +45,15 @@ func (h *Handler) GetInvoiceWidgetsData(w http.ResponseWriter, r *http.Request) 
 	}
 
 	cacheKey := fmt.Sprintf("invoice_widgets:%v", user.ID)
-	ctx := context.Background()
-	jsonData1, err := h.Cache.Get(ctx, cacheKey).Result()
+	cachedData, err := h.GetCacheItem(r.Context(), cacheKey)
 	if err == nil {
-		responses.NewOKResponseWithJson(w, "success", []byte(jsonData1))
+		var response InvoiceWidgetResource
+		err := json.Unmarshal(cachedData, &response)
+		if err != nil {
+			return
+		}
 
+		responses.NewOKResponseWithData(w, "success", response)
 		return
 	}
 
@@ -72,19 +75,13 @@ func (h *Handler) GetInvoiceWidgetsData(w http.ResponseWriter, r *http.Request) 
 		TotalPaidAmount:    pkg.FormatMoneyToUsd(data.TotalPaidAmount),
 	}
 
-	jsonData2, err := json.Marshal(response)
+	responses.NewOKResponseWithData(w, "success", response)
+
+	err = h.SetCacheItem(r.Context(), cacheKey, response)
 	if err != nil {
+		h.Logger.Error(fmt.Sprintf("Setting invoice widgets cache failed: %v", err.Error()))
 		return
 	}
-
-	err = h.Cache.Set(ctx, cacheKey, jsonData2, time.Minute*5).Err()
-	if err != nil {
-		h.Logger.Error(fmt.Sprintf("Setting cache failed: %v", err.Error()))
-		responses.NewInternalServerError(w, "Server error")
-		return
-	}
-
-	responses.NewOKResponseWithData(w, "success", data)
 }
 
 func (h *Handler) CreateInvoice(w http.ResponseWriter, r *http.Request) {
@@ -104,11 +101,13 @@ func (h *Handler) CreateInvoice(w http.ResponseWriter, r *http.Request) {
 		responses.NewBadRequest(w, "User not found")
 		return
 	}
+
 	dueAtTime, err := time.Parse(time.RFC3339, request.DueDate)
 	if err != nil {
 		responses.NewBadRequest(w, "Invalid dueAt date")
 		return
 	}
+
 	invoice := models.Invoice{
 		Title:  request.Title,
 		Amount: request.Amount,
@@ -135,9 +134,65 @@ func (h *Handler) CreateInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.NewCreatedResponseWithData(w, "Invoice created successfully.", response)
-	ctx := context.Background()
+
 	cacheKey := fmt.Sprintf("invoice_widgets:%v", user.ID)
-	_, err = h.Cache.Del(ctx, cacheKey).Result()
+	err = h.DeleteCacheItem(r.Context(), cacheKey)
+	if err != nil {
+		h.Logger.Error(fmt.Sprintf("Failed to flush invoice widgets cache: %v", err.Error()))
+	}
+}
+
+func (h *Handler) UpdateInvoice(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(models.User)
+	if !ok {
+		responses.NewBadRequest(w, "User not found")
+		return
+	}
+
+	invoiceID := r.PathValue("invoiceID")
+	request, err := pkg.ParseRequestBody[requests.UpdateInvoice](r)
+	if err != nil {
+		responses.NewUnprocessableEntity(w, err.Error())
+		return
+	}
+
+	isValid := pkg.IsValidTime(request.DueDate)
+	if !isValid {
+		responses.NewBadRequest(w, "Invalid dueAt date")
+		return
+	}
+
+	var uInvoice models.Invoice
+	oInvoice, err := h.Model.GetInvoiceById(r.Context(), invoiceID)
+	if err != nil {
+		responses.NewNotFound(w, "invoice not found")
+		return
+	}
+
+	uInvoice.UpdateFromRequest(request, oInvoice)
+
+	err = h.Model.UpdateInvoice(r.Context(), uInvoice)
+	if err != nil {
+		h.Logger.Error(fmt.Sprintf("Error updating invoice %v: %v", invoiceID, err.Error()))
+		responses.NewInternalServerError(w, err.Error())
+	}
+
+	response := InvoiceResource{
+		ID:   uInvoice.ID,
+		Type: "invoice",
+		Attributes: InvoiceAttributes{
+			Title:     uInvoice.Title,
+			Amount:    pkg.FormatMoneyToUsd(&uInvoice.Amount),
+			State:     uInvoice.State,
+			DueAt:     uInvoice.DueAt,
+			CreatedAt: uInvoice.CreatedAt,
+		},
+	}
+
+	responses.NewOKResponseWithData(w, "Invoice updated successfully.", response)
+
+	cacheKey := fmt.Sprintf("invoice_widgets:%v", user.ID)
+	err = h.DeleteCacheItem(r.Context(), cacheKey)
 	if err != nil {
 		h.Logger.Error(fmt.Sprintf("Failed to flush invoice widgets cache: %v", err.Error()))
 	}

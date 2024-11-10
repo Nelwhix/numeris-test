@@ -72,6 +72,7 @@ func main() {
 	// Auth routes
 	r.Handle("GET /api/v1/invoices/widgets", m.Register(handler.GetInvoiceWidgetsData))
 	r.Handle("POST /api/v1/invoices", m.Register(handler.CreateInvoice))
+	r.Handle("PATCH /api/v1/invoices/{invoiceID}", m.Register(handler.UpdateInvoice))
 
 	fmt.Printf("Numeris started at http://localhost:%s\n", ServerPort)
 

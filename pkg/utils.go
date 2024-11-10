@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 func ParseRequestBody[T any](r *http.Request) (T, error) {
@@ -32,4 +33,13 @@ func FormatMoneyToUsd(amount *int64) string {
 	amountInUsd := float64(*amount) / 100.0
 
 	return fmt.Sprintf("$%.2f", amountInUsd)
+}
+
+func IsValidTime(t string) bool {
+	_, err := time.Parse(time.RFC3339, t)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

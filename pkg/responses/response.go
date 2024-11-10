@@ -134,7 +134,20 @@ func NewOKResponseWithData(w http.ResponseWriter, message string, data interface
 
 func NewOKResponseWithJson(w http.ResponseWriter, message string, data []byte) {
 	w.WriteHeader(http.StatusOK)
-	_, err := w.Write(data)
+	response := struct {
+		Message string `json:"message"`
+		Data    []byte `json:"data"`
+	}{
+		Message: message,
+		Data:    data,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = w.Write(jsonResponse)
 	if err != nil {
 		log.Fatal(err)
 	}

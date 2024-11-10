@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"github.com/Nelwhix/numeris/pkg/enums"
+	"github.com/Nelwhix/numeris/pkg/requests"
 	"github.com/oklog/ulid/v2"
 	"time"
 )
@@ -26,6 +27,32 @@ type InvoiceWidget struct {
 	TotalOverdueAmount *int64
 	TotalUnpaidAmount  *int64
 	TotalPaidAmount    *int64
+}
+
+func (i *Invoice) UpdateFromRequest(request requests.UpdateInvoice, o Invoice) {
+	if request.Title == "" {
+		i.Title = o.Title
+	} else {
+		i.Title = request.Title
+	}
+
+	if request.Amount == 0 {
+		i.Amount = o.Amount
+	} else {
+		i.Amount = request.Amount
+	}
+
+	if request.State == nil {
+		i.State = o.State
+	} else {
+		i.State = *request.State
+	}
+
+	if request.DueDate == "" {
+		i.DueAt = o.DueAt
+	} else {
+		i.DueAt, _ = time.Parse(time.RFC3339, request.DueDate)
+	}
 }
 
 func (m *Model) InsertIntoInvoices(ctx context.Context, invoice Invoice) (Invoice, error) {
@@ -96,4 +123,17 @@ func (m *Model) GetInvoiceWidgetsData(ctx context.Context, userID string) (Invoi
 	}
 
 	return invoiceWidget, nil
+}
+
+func (m *Model) UpdateInvoice(ctx context.Context, invoice Invoice) error {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	sql := "update invoices set title = $1, amount_cents = $2, state = $3, due_at = $4 where id = $5"
+	_, err := m.Conn.Exec(ctx, sql, invoice.Title, invoice.Amount, invoice.State, invoice.DueAt, invoice.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

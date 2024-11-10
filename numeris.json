@@ -207,6 +207,53 @@
           }
         }
       }
+    },
+    "/invoices/{invoiceId}": {
+      "patch": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Update an invoice",
+        "operationId": "71989198-9550-424d-a4e6-4f2b81d736d5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoice updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/InvoiceResource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -306,7 +353,32 @@
           },
           "dueDate": {
             "description": "Invoice due date in RFC3339 format: 2024-11-08T14:25:00Z",
+            "type": "string",
+            "example": "2006-01-02T15:04:05+07:00"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateInvoiceRequest": {
+        "title": "UpdateInvoiceRequest",
+        "properties": {
+          "title": {
+            "description": "Invoice title",
             "type": "string"
+          },
+          "amount": {
+            "description": "Invoice amount in cents",
+            "type": "string"
+          },
+          "dueDate": {
+            "description": "Invoice due date in RFC3339 format: 2024-11-08T14:25:00Z",
+            "type": "string",
+            "example": "2006-01-02T15:04:05+07:00"
+          },
+          "state": {
+            "description": "Invoice State",
+            "type": "string",
+            "enum": ["Draft", "Overdue", "Unpaid", "Paid", "PaymentPending"]
           }
         },
         "type": "object"
