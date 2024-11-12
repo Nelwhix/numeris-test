@@ -1,7 +1,9 @@
 package models
 
-import "github.com/jackc/pgx/v5"
+import (
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type Model struct {
-	Conn *pgx.Conn
+	Conn *pgxpool.Pool
 }

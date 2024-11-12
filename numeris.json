@@ -102,6 +102,69 @@
       }
     },
     "/invoices": {
+      "get": {
+        "tags": [
+          "Invoice"
+        ],
+        "summary": "Get all invoices",
+        "operationId": "11b67763-4f73-4216-98bd-d3c5065b5ae1",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "To sort by desc append '-' before the parameter. e.g. created_at for asc, -created_at for desc https://jsonapi.org/format/#fetching-sorting",
+            "schema": {
+              "type": "string",
+              "description": "Allowed sort: created_at"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice data retrieved successfully!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InvoiceResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Invoice"
@@ -220,6 +283,16 @@
             "BearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -243,6 +316,31 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/InvoiceResource"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "currentPage": {
+                              "type": "integer"
+                            },
+                            "perPage": {
+                              "type": "integer"
+                            },
+                            "count": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "totalPages": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -349,12 +447,12 @@
           },
           "amount": {
             "description": "Invoice amount in cents",
-            "type": "string"
+            "type": "integer"
           },
           "dueDate": {
             "description": "Invoice due date in RFC3339 format: 2024-11-08T14:25:00Z",
             "type": "string",
-            "example": "2006-01-02T15:04:05+07:00"
+            "examples": ["2006-01-02T15:04:05+07:00"]
           }
         },
         "type": "object"
@@ -368,12 +466,12 @@
           },
           "amount": {
             "description": "Invoice amount in cents",
-            "type": "string"
+            "type": "integer"
           },
           "dueDate": {
             "description": "Invoice due date in RFC3339 format: 2024-11-08T14:25:00Z",
             "type": "string",
-            "example": "2006-01-02T15:04:05+07:00"
+            "examples": ["2006-01-02T15:04:05+07:00"]
           },
           "state": {
             "description": "Invoice State",
@@ -400,7 +498,7 @@
                 "type": "string"
               },
               "amount": {
-                "type": "integer"
+                "type": "string"
               },
               "state": {
                 "type": "string"

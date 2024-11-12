@@ -3,11 +3,11 @@ package pkg
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
 )
 
-func CreateDbConn() (*pgx.Conn, error) {
+func CreateDbConn() (*pgxpool.Pool, error) {
 	connString := fmt.Sprintf(
 		"postgres://%v:%v@%v/%v",
 		os.Getenv("DATABASE_USER"),
@@ -16,10 +16,10 @@ func CreateDbConn() (*pgx.Conn, error) {
 		os.Getenv("DATABASE_NAME"),
 	)
 
-	conn, err := pgx.Connect(context.Background(), connString)
+	pool, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
 		return nil, err
 	}
 
-	return conn, nil
+	return pool, nil
 }

@@ -41,14 +41,15 @@ func main() {
 
 	validate = validator.New(validator.WithRequiredStructEnabled())
 
-	conn, err := pkg.CreateDbConn()
+	pool, err := pkg.CreateDbConn()
 	if err != nil {
-		log.Fatalf("failed to connect to db: %v", err)
+		log.Fatalf("failed to connect to db pool: %v", err)
 	}
+	defer pool.Close()
 
 	cache := pkg.CreateCacheStore()
 	model := models.Model{
-		Conn: conn,
+		Conn: pool,
 	}
 
 	handler := handlers.Handler{
@@ -71,14 +72,17 @@ func main() {
 
 	// Auth routes
 	r.Handle("GET /api/v1/invoices/widgets", m.Register(handler.GetInvoiceWidgetsData))
+	r.Handle("GET /api/v1/invoices", m.Register(handler.GetInvoices))
 	r.Handle("POST /api/v1/invoices", m.Register(handler.CreateInvoice))
 	r.Handle("PATCH /api/v1/invoices/{invoiceID}", m.Register(handler.UpdateInvoice))
+	r.Handle("GET /api/v1/invoices/activities", m.Register(handler.GetInvoiceActivities))
 
-	fmt.Printf("Numeris started at http://localhost:%s\n", ServerPort)
+	fmt.Printf("Numeris started at http://localhost%s\n", ServerPort)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "PATCH", "PUT", "DELETE"},
 		AllowCredentials: true,
 		Debug:            false,
 	})

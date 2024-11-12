@@ -95,23 +95,6 @@ func NewNotFound(w http.ResponseWriter, message string) {
 	}
 }
 
-func NewOKResponse(w http.ResponseWriter, message string) {
-	w.WriteHeader(http.StatusOK)
-	response := okResponse{
-		Message: message,
-	}
-
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func NewOKResponseWithData(w http.ResponseWriter, message string, data interface{}) {
 	w.WriteHeader(http.StatusOK)
 	response := okResponse{
@@ -188,4 +171,20 @@ func NewRedirect(w http.ResponseWriter, message string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func NewOK(w http.ResponseWriter, response interface{}) {
+	w.WriteHeader(http.StatusOK)
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return
 }

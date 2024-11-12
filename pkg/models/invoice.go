@@ -2,9 +2,11 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"github.com/Nelwhix/numeris/pkg/enums"
 	"github.com/Nelwhix/numeris/pkg/requests"
 	"github.com/oklog/ulid/v2"
+	"strings"
 	"time"
 )
 
@@ -29,7 +31,12 @@ type InvoiceWidget struct {
 	TotalPaidAmount    *int64
 }
 
+type InvoiceCount struct {
+	Total int
+}
+
 func (i *Invoice) UpdateFromRequest(request requests.UpdateInvoice, o Invoice) {
+	i.ID = o.ID
 	if request.Title == "" {
 		i.Title = o.Title
 	} else {
@@ -136,4 +143,69 @@ func (m *Model) UpdateInvoice(ctx context.Context, invoice Invoice) error {
 	}
 
 	return nil
+}
+
+func (m *Model) GetInvoices(ctx context.Context, userID string, limit int, page int, sort []string) ([]Invoice, error) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	offset := limit * (page - 1)
+	orderByClause := ""
+	if len(sort) > 0 {
+		orderByClause = "ORDER BY "
+		for i, s := range sort {
+			if i > 0 {
+				orderByClause += ", "
+			}
+
+			if strings.HasPrefix(s, "-") {
+				orderByClause += s[1:] + " DESC"
+			} else {
+				orderByClause += s + " ASC"
+			}
+		}
+	}
+
+	sql := fmt.Sprintf(`SELECT id, title, amount_cents, state, due_at, created_at FROM invoices where user_id = $3 %s LIMIT $1 OFFSET $2;`, orderByClause)
+	rows, err := m.Conn.Query(ctx, sql, limit, offset, userID)
+	if err != nil {
+		return []Invoice{}, err
+	}
+	defer rows.Close()
+
+	var invoices []Invoice
+	for rows.Next() {
+		var invoice Invoice
+		var state int
+
+		err = rows.Scan(&invoice.ID, &invoice.Title, &invoice.Amount, &state, &invoice.DueAt, &invoice.CreatedAt)
+		if err != nil {
+			return []Invoice{}, err
+		}
+
+		invoice.State, err = enums.ParseInvoiceState(state)
+		if err != nil {
+			return []Invoice{}, err
+		}
+
+		invoices = append(invoices, invoice)
+	}
+
+	return invoices, nil
+}
+
+func (m *Model) GetTotalInvoiceCountForUser(ctx context.Context, userID string) (InvoiceCount, error) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	sql := `SELECT count(*) FROM invoices where user_id = $1`
+
+	var invoiceCount InvoiceCount
+	row := m.Conn.QueryRow(ctx, sql, userID)
+	err := row.Scan(&invoiceCount.Total)
+	if err != nil {
+		return InvoiceCount{}, err
+	}
+
+	return invoiceCount, nil
 }

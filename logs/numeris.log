@@ -7,3 +7,15 @@
 {"time":"2024-11-08T18:08:19.600146+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
 {"time":"2024-11-08T18:08:37.672556+01:00","level":"INFO","msg":"Parts couldn't be split","Authorization":""}
 {"time":"2024-11-08T18:09:32.169512+01:00","level":"ERROR","msg":"Failed to get invoice widgets data: can't scan into dest[5]: cannot scan NULL into *int64"}
+{"time":"2024-11-11T00:06:16.957867+01:00","level":"INFO","msg":"Updating invoice, state is: Overdue"}
+{"time":"2024-11-11T08:59:53.68642+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK ERROR: syntax error at or near \"where\" (SQLSTATE 42601)"}
+{"time":"2024-11-11T09:00:48.541069+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK ERROR: syntax error at or near \"where\" (SQLSTATE 42601)"}
+{"time":"2024-11-11T09:02:10.074153+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK SELECT id, title, amount_cents, state, due_at, created_at FROM invoices  LIMIT $1 OFFSET $2 where user_id = $3"}
+{"time":"2024-11-11T09:04:49.905331+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK can't scan into dest[3]: cannot scan int2 (OID 21) in binary format into int"}
+{"time":"2024-11-11T09:11:17.778613+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK can't scan into dest[3]: cannot scan int2 (OID 21) in binary format into int16"}
+{"time":"2024-11-11T09:13:50.866591+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK can't scan into dest[3]: cannot scan int4 (OID 23) in binary format into int"}
+{"time":"2024-11-11T09:16:58.675462+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK can't scan into dest[3]: cannot scan int4 (OID 23) in binary format into int32"}
+{"time":"2024-11-11T09:26:13.595313+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK can't scan into dest[3]: cannot scan int2 (OID 21) in binary format into int64"}
+{"time":"2024-11-11T09:26:46.177822+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK can't scan into dest[3]: cannot scan int4 (OID 23) in binary format into int64"}
+{"time":"2024-11-11T09:35:32.222636+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK SELECT id, title, amount_cents, state::int4, due_at, created_at FROM invoices where user_id = $3  LIMIT $1 OFFSET $2;"}
+{"time":"2024-11-11T09:37:02.459141+01:00","level":"ERROR","msg":"Error getting invoices for user with id: 01JC3X13K26M0H0WDE330EBRYK SELECT id, title, amount_cents, state, due_at, created_at FROM invoices where user_id = $3 ORDER BY created_at DESC LIMIT $1 OFFSET $2;"}
